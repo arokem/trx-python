@@ -398,6 +398,26 @@ def test_trxfile_close():
     pass
 
 
+@pytest.mark.parametrize("path", [("small.trx")])
+def test_close_releases_mmap_from_zip(path):
+    """close() must release mmap handles even when loaded via load_from_zip()."""
+    path = os.path.join(get_home(), "memmap_test_data", path)
+    trx = tmm.load_from_zip(path)
+
+    assert trx._uncompressed_folder_handle is None
+
+    mmap_obj = trx.streamlines._data._mmap
+    assert mmap_obj is not None, "expected a live mmap before close()"
+    assert not mmap_obj.closed, "mmap should be open before close()"
+
+    trx.close()
+
+    assert mmap_obj.closed, (
+        "mmap is still open after close() — the mmap teardown was skipped "
+        "because _uncompressed_folder_handle was None"
+    )
+
+
 # Endianness tests for cross-platform compatibility (Issue #83)
 @pytest.mark.parametrize(
     "dtype_input,expected_byteorder",
