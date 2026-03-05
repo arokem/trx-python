@@ -2260,23 +2260,22 @@ class TrxFile:
         None
             Releases file handles and removes temporary storage.
         """
+        close_or_delete_mmap(self.streamlines)
+
+        for key in self.data_per_vertex:
+            close_or_delete_mmap(self.data_per_vertex[key])
+
+        for key in self.data_per_streamline:
+            close_or_delete_mmap(self.data_per_streamline[key])
+
+        for key in self.groups:
+            close_or_delete_mmap(self.groups[key])
+
+        for key in self.data_per_group:
+            for dpg in self.data_per_group[key]:
+                close_or_delete_mmap(self.data_per_group[key][dpg])
+
         if self._uncompressed_folder_handle is not None:
-            close_or_delete_mmap(self.streamlines)
-
-            # # Close or delete attributes in dictionaries
-            for key in self.data_per_vertex:
-                close_or_delete_mmap(self.data_per_vertex[key])
-
-            for key in self.data_per_streamline:
-                close_or_delete_mmap(self.data_per_streamline[key])
-
-            for key in self.groups:
-                close_or_delete_mmap(self.groups[key])
-
-            for key in self.data_per_group:
-                for dpg in self.data_per_group[key]:
-                    close_or_delete_mmap(self.data_per_group[key][dpg])
-
             try:
                 self._uncompressed_folder_handle.cleanup()
             except PermissionError:
