@@ -15,6 +15,7 @@ jobs:
   build-sdist:
     name: Build sdist
     runs-on: ubuntu-latest
+    if: github.repository == 'tee-ar-ex/trx-python'
     steps:
       - uses: actions/checkout@v6
         with:
